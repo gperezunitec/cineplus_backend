@@ -30,9 +30,9 @@ app.post("/usuarios/login", async (req, res) => {
         res.json({
             message: "Login exitoso",
             usuario: {
-                id: usuario.id,
+                id: usuario.id_usuario,
                 correo: usuario.correo
-                // 👈 puedes devolver más datos si quieres
+
             }
         });
     } catch (err) {
@@ -107,6 +107,8 @@ app.delete("/peliculas/:id", async (req, res) => {
     res.json({ message: "Película eliminada" });
 });
 
+
+
 /* -------------------
    FAVORITOS (CRUD)
 ------------------- */
@@ -116,6 +118,29 @@ app.get("/favoritos", async (req, res) => {
     });
     res.json(favoritos);
 });
+
+
+// Obtener favoritos por id de usuario
+app.get("/favoritos/usuario/:id", async (req, res) => {
+    const idUsuario = req.params.id;
+
+    try {
+        const favoritos = await Favorito.findAll({
+            where: { id_usuario: idUsuario },
+            include: [Pelicula], // Incluye solo la información de la película
+        });
+
+        if (!favoritos || favoritos.length === 0) {
+            return res.status(404).json({ message: "No se encontraron favoritos para este usuario" });
+        }
+
+        res.json(favoritos);
+    } catch (err) {
+        res.status(500).json({ message: "Error al obtener favoritos", error: err.message });
+    }
+});
+
+
 
 app.post("/favoritos", async (req, res) => {
     const { id_usuario, id_pelicula, comentario, calificacion } = req.body;
