@@ -10,6 +10,37 @@ app.use(cors())
 
 app.use(express.json());
 
+/* -------------------
+   LOGIN DE USUARIO
+------------------- */
+app.post("/usuarios/login", async (req, res) => {
+    const { correo, password } = req.body;
+
+    if (!correo || !password) {
+        return res.status(400).json({ message: "Correo y contraseña son requeridos" });
+    }
+
+    try {
+        const usuario = await Usuario.findOne({ where: { correo, password } });
+
+        if (!usuario) {
+            return res.status(401).json({ message: "Credenciales inválidas" });
+        }
+
+        res.json({
+            message: "Login exitoso",
+            usuario: {
+                id: usuario.id,
+                correo: usuario.correo
+                // 👈 puedes devolver más datos si quieres
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Error en el servidor", error: err.message });
+    }
+});
+
+
 
 /* -------------------
    USUARIOS (CRUD)
@@ -109,6 +140,6 @@ app.delete("/favoritos/:id", async (req, res) => {
    INICIO DEL SERVIDOR
 ------------------- */
 
-app.listen(8000, () => {
-    console.log('corriendo en puerto 8000');
+app.listen(3000, () => {
+    console.log('corriendo en puerto 3000');
 });
