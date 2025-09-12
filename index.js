@@ -10,6 +10,37 @@ app.use(cors())
 
 app.use(express.json());
 
+/* -------------------
+   LOGIN DE USUARIO
+------------------- */
+app.post("/usuarios/login", async (req, res) => {
+    const { correo, password } = req.body;
+
+    if (!correo || !password) {
+        return res.status(400).json({ message: "Correo y contraseña son requeridos" });
+    }
+
+    try {
+        const usuario = await Usuario.findOne({ where: { correo, password } });
+
+        if (!usuario) {
+            return res.status(401).json({ message: "Credenciales inválidas" });
+        }
+
+        res.json({
+            message: "Login exitoso",
+            usuario: {
+                id: usuario.id_usuario,
+                correo: usuario.correo
+
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ message: "Error en el servidor", error: err.message });
+    }
+});
+
+
 
 /* -------------------
    USUARIOS (CRUD)
@@ -76,6 +107,8 @@ app.delete("/peliculas/:id", async (req, res) => {
     res.json({ message: "Película eliminada" });
 });
 
+
+
 /* -------------------
    FAVORITOS (CRUD)
 ------------------- */
@@ -86,6 +119,29 @@ app.get("/favoritos", async (req, res) => {
     res.json(favoritos);
 });
 
+
+// Obtener favoritos por id de usuario
+app.get("/favoritos/usuario/:id", async (req, res) => {
+    const idUsuario = req.params.id;
+
+    try {
+        const favoritos = await Favorito.findAll({
+            where: { id_usuario: idUsuario },
+            include: [Pelicula], // Incluye solo la información de la película
+        });
+
+        if (!favoritos || favoritos.length === 0) {
+            return res.status(404).json({ message: "No se encontraron favoritos para este usuario" });
+        }
+
+        res.json(favoritos);
+    } catch (err) {
+        res.status(500).json({ message: "Error al obtener favoritos", error: err.message });
+    }
+});
+
+
+
 app.post("/favoritos", async (req, res) => {
     const { id_usuario, id_pelicula, comentario, calificacion } = req.body;
     try {
@@ -95,6 +151,59 @@ app.post("/favoritos", async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 });
+
+// Agregar una película a favoritos del usuario actual
+app.post("/usuarios/:id/favoritos", async (req, res) => {
+    const idUsuario = req.params.id;
+    const {id_pelicula, titulo, comentario, calificacion } = req.body;
+
+    try {
+        // Validación: asegurarse de que se envíe un título
+        if (!titulo) {
+            return res.status(400).json({ message: "El título de la película es requerido" });
+        }
+
+        // Verificar que exista el usuario
+        const usuario = await Usuario.findByPk(idUsuario);
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // Verificar si ya existe en favoritos
+        const yaExiste = await Favorito.findOne({
+            where: { id_usuario: idUsuario, titulo }
+        });
+        if (yaExiste) {
+            return res.status(400).json({ message: "La película ya está en favoritos" });
+        }
+
+        // Crear el favorito
+        const favorito = await Favorito.create({
+            id_usuario: idUsuario,
+            titulo:titulo,
+            comentario: comentario || "",
+            calificacion: calificacion || null
+        });
+
+        res.status(201).json({
+            message: "Película agregada a favoritos exitosamente",
+            favorito
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Error al agregar a favoritos",
+            error: err.message
+        });
+    }
+});
+
+
+
+
+
+
 
 app.delete("/favoritos/:id", async (req, res) => {
     const favorito = await Favorito.findByPk(req.params.id);
@@ -109,6 +218,6 @@ app.delete("/favoritos/:id", async (req, res) => {
    INICIO DEL SERVIDOR
 ------------------- */
 
-app.listen(8000, () => {
-    console.log('corriendo en puerto 8000');
+app.listen(3000, () => {
+    console.log('corriendo en puerto 3000');
 });
