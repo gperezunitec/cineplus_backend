@@ -9,6 +9,12 @@ const Favorito = sequelize.define("Favorito", {
         autoIncrement: true,
         primaryKey: true,
     },
+    id_usuario: {
+        type:DataTypes.INTEGER
+    },
+    id_pelicula:{
+        type:DataTypes.INTEGER
+    },
     comentario: {
         type: DataTypes.STRING(255),
     },
