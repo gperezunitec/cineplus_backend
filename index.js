@@ -143,10 +143,18 @@ app.get("/favoritos/usuario/:id", async (req, res) => {
 
 
 app.post("/favoritos", async (req, res) => {
-    const { id_usuario, id_pelicula, comentario, calificacion } = req.body;
+    const { id_usuario, id_pelicula, nombre_pelicula, comentario, calificacion } = req.body;
+
     try {
-        const favorito = await Favorito.create({ id_usuario, id_pelicula, comentario, calificacion });
-        res.json(favorito);
+        const favorito = await Favorito.create({
+            id_usuario,
+            id_pelicula,
+            nombre_pelicula,   // ✅ lo guardamos
+            comentario,
+            calificacion
+        });
+
+        res.status(201).json(favorito);
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
@@ -155,32 +163,28 @@ app.post("/favoritos", async (req, res) => {
 // Agregar una película a favoritos del usuario actual
 app.post("/usuarios/:id/favoritos", async (req, res) => {
     const idUsuario = req.params.id;
-    const {id_pelicula, titulo, comentario, calificacion } = req.body;
+    const { nombre_pelicula, comentario, calificacion } = req.body;
 
     try {
-        // Validación: asegurarse de que se envíe un título
-        if (!titulo) {
-            return res.status(400).json({ message: "El título de la película es requerido" });
+        if (!nombre_pelicula) {
+            return res.status(400).json({ message: "El nombre de la película es requerido" });
         }
 
-        // Verificar que exista el usuario
         const usuario = await Usuario.findByPk(idUsuario);
         if (!usuario) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
 
-        // Verificar si ya existe en favoritos
         const yaExiste = await Favorito.findOne({
-            where: { id_usuario: idUsuario, titulo }
+            where: { id_usuario: idUsuario, nombre_pelicula }
         });
         if (yaExiste) {
             return res.status(400).json({ message: "La película ya está en favoritos" });
         }
 
-        // Crear el favorito
         const favorito = await Favorito.create({
             id_usuario: idUsuario,
-            titulo:titulo,
+            nombre_pelicula,
             comentario: comentario || "",
             calificacion: calificacion || null
         });
@@ -198,7 +202,6 @@ app.post("/usuarios/:id/favoritos", async (req, res) => {
         });
     }
 });
-
 
 
 
