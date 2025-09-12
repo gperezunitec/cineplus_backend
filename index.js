@@ -206,6 +206,40 @@ app.post("/usuarios/:id/favoritos", async (req, res) => {
 
 
 
+// Editar comentario y calificación de un favorito
+app.put("/favoritos/:id", async (req, res) => {
+    const { id } = req.params;
+    const { comentario, calificacion } = req.body;
+
+    try {
+        const favorito = await Favorito.findByPk(id);
+
+        if (!favorito) {
+            return res.status(404).json({ message: "Favorito no encontrado" });
+        }
+
+        // Actualizamos solo los campos enviados
+        favorito.comentario = comentario !== undefined ? comentario : favorito.comentario;
+        favorito.calificacion = calificacion !== undefined ? calificacion : favorito.calificacion;
+
+        await favorito.save();
+
+        res.json({
+            message: "Comentario y calificación actualizados correctamente",
+            favorito
+        });
+    } catch (err) {
+        console.error("Error al actualizar favorito:", err);
+        res.status(500).json({
+            message: "Error al actualizar favorito",
+            error: err.message
+        });
+    }
+});
+
+
+
+
 
 
 app.delete("/favoritos/:id", async (req, res) => {
