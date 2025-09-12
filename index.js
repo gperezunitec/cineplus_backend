@@ -152,6 +152,59 @@ app.post("/favoritos", async (req, res) => {
     }
 });
 
+// Agregar una película a favoritos del usuario actual
+app.post("/usuarios/:id/favoritos", async (req, res) => {
+    const idUsuario = req.params.id;
+    const {id_pelicula, titulo, comentario, calificacion } = req.body;
+
+    try {
+        // Validación: asegurarse de que se envíe un título
+        if (!titulo) {
+            return res.status(400).json({ message: "El título de la película es requerido" });
+        }
+
+        // Verificar que exista el usuario
+        const usuario = await Usuario.findByPk(idUsuario);
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // Verificar si ya existe en favoritos
+        const yaExiste = await Favorito.findOne({
+            where: { id_usuario: idUsuario, titulo }
+        });
+        if (yaExiste) {
+            return res.status(400).json({ message: "La película ya está en favoritos" });
+        }
+
+        // Crear el favorito
+        const favorito = await Favorito.create({
+            id_usuario: idUsuario,
+            titulo:titulo,
+            comentario: comentario || "",
+            calificacion: calificacion || null
+        });
+
+        res.status(201).json({
+            message: "Película agregada a favoritos exitosamente",
+            favorito
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({
+            message: "Error al agregar a favoritos",
+            error: err.message
+        });
+    }
+});
+
+
+
+
+
+
+
 app.delete("/favoritos/:id", async (req, res) => {
     const favorito = await Favorito.findByPk(req.params.id);
     if (!favorito) return res.status(404).json({ error: "Favorito no encontrado" });
