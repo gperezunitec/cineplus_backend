@@ -1,7 +1,6 @@
 {
   "name": "cineplusback",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,5 +14,15 @@
     "express": "^5.1.0",
     "mysql2": "^3.14.4",
     "sequelize": "^6.37.7"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gperezunitec/cineplus_backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gperezunitec/cineplus_backend/issues"
+  },
+  "homepage": "https://github.com/gperezunitec/cineplus_backend#readme",
+  "description": ""
 }

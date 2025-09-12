@@ -3,7 +3,7 @@ const {Sequelize}=require('sequelize');
 const sequelize=new Sequelize(
     'cineplus',
     'root',
-    'admin',
+    '0000',
     {
         host:'localhost',
         port:3306,
