@@ -15,6 +15,10 @@ const Favorito = sequelize.define("Favorito", {
     id_pelicula:{
         type:DataTypes.INTEGER
     },
+    nombre_pelicula: {   // ✅ Nuevo campo
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
     comentario: {
         type: DataTypes.STRING(255),
     },
